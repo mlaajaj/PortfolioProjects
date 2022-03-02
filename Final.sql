@@ -1,21 +1,22 @@
 -- A la découverte de notre jeux de données 
 
-
 SELECT *
 FROM paris
 LIMIT 10;
-------------------------------------
+
 SELECT COUNT(*)
 FROM paris;
--- Jeux de 1,9M de données --
 
-				--- PARTIE EXPLORATION ---
+------------------------------------------------------------------------------------------------------------
 
--- I. Exploration du jeu de données et data cleaning 
+				--- PARTIE DATA CLEANING - Explortion ---
 
-	-- 1. Commençons par la colonne device_portal_format qui indique le type d'appareil connecté
+
+-- 1. Commençons par la colonne device_portal_format qui indique le type d'appareil connecté
+
 SELECT distinct device_portal_format
 FROM paris;
+	
 	-- Données à corriger : Tablet en Tablette et Computer en Ordinateur pour se retrouver avec 3 variables : Mobile, Tablette et Ordinateur.
 
 SELECT 
@@ -41,7 +42,9 @@ ADD device as (
 SELECT distinct device
 FROM paris;
 
-	-- 2. Colonne device_constructor_name qui indique le nom du constructeur de l'appareil 
+------------------------------------------------------------------------------------------------------------
+
+-- 2. Colonne device_constructor_name qui indique le nom du constructeur de l'appareil 
 SELECT DISTINCT device_constructor_name
 from paris;
 	-- Autre et other = même chose 
@@ -56,7 +59,10 @@ ADD marque as (
 SELECT distinct marque
 from paris;
 	
-	-- 3. Colonne device_browser_name_version = correspond au navigateur utilisé 
+
+------------------------------------------------------------------------------------------------------------
+
+-- 3. Colonne device_browser_name_version = correspond au navigateur utilisé 
 
 select distinct device_browser_name_version
 from paris;
@@ -75,8 +81,10 @@ ADD navigateur as (
 	
 select distinct navigateur 
 from paris;
-	
-	-- 4. Regardons maintenant la langue d'utilisation
+
+------------------------------------------------------------------------------------------------------------
+
+-- 4. Langue d'utilisation
 	
 SELECT
 	distinct userlanguage
@@ -103,41 +111,26 @@ from paris;
 SELECT count(distinct langue)
 from paris;
 	
-	-- 5.Les noms de site 
+------------------------------------------------------------------------------------------------------------
+	
+-- 5.Les noms de site 
 
 Select substr(nom_site, 1, instr(nom_site," ") -1), round(1. * count(*)/(select count(*) from paris),2)
 from paris
 group by substr(nom_site, 1, instr(nom_site," ") -1)
 having round(1. * count(*)/(select count(*) from paris),2) > 0.03  ;	
 
-	-- Les éléments selectionnés représentent 87% du dataset et nous permettent de focaliser notre étude sur un nombre restraint de sites.
 	
-ALTER TABLE paris 
-DROP emplacement_ok; 	
 
 ALTER TABLE paris 
 add emplacement as (substr(nom_site, 1, instr(nom_site," ") -1)) ; 
-	
-ALTER TABLE paris
-add emplacement_ok as (
-case emplacement
-when  "BIBLIOTHEQUE" then "ok"
-when  "CENTRE" then "ok"
-when  "HOTEL" then "ok" 
-when  "JARDIN" then "ok" 
-when  "MAIRIE" then "ok" 
-when  "MAISON" then "ok" 
-when  "MEDIATHEQUE" then "ok" 
-when  "PARC" then "ok" 
-when  "SQUARE" then "ok" 
-else "nok"
-end ) 
 
 select distinct emplacement_ok
 from paris;
 
+------------------------------------------------------------------------------------------------------------
 
-	-- 6. Dates et jours de la semaine 
+-- 6. Dates et jours de la semaine 
 
 ALTER TABLE paris
 ADD jour_semaine as (  
@@ -151,14 +144,7 @@ ADD jour_semaine as (
   else 'Samedi' 
   end )
 
-	-- 7. Création de notre table avec les colonnes qui nous intéressent 
-
-DROP TABLE IF EXISTS paris_temp; 
-CREATE TABLE paris_temp AS
-select emplacement, datetime, jour_semaine, temps_de_sessions_en_minutes, donnee_entrante_go,donnee_sortante_gigaoctet,device, marque, navigateur, langue, nom_site
-from paris 
-where emplacement_ok = 'ok'
-
+------------------------------------------------------------------------------------------------------------
 
 				--- PARTIE ANALYSE ---
 
