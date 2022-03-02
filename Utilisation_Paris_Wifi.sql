@@ -1,7 +1,6 @@
---- Vue d'ensemble du jeux de données ---
 -- Jeux de données présentant l'ensemble des sessions des utilisateurs des hotspots Wifi de la Ville de Paris par site. 
 -- Disponible sur le site opendata.paris.fr 
-
+-- Vue d'ensemble du jeux de données 
 
 SELECT *
 FROM paris
