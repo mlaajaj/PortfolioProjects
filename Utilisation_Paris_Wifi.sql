@@ -12,7 +12,7 @@ FROM paris;
 
 ------------------------------------------------------------------------------------------------------------
 
-				--- PARTIE DATA CLEANING - Explortion ---
+				--- PARTIE DATA CLEANING / EXPLORATION ---
 
 
 -- 1. Commençons par la colonne device_portal_format qui indique le type d'appareil connecté
