@@ -174,7 +174,7 @@ ORDER BY Pourcentage ASC;
 -------------------
 	
 -- Pour les mobiles, quelle marque est majoritaire ? 
-select  marque, 
+SELECT  marque, 
 	count(marque) as Total, 
 	round( 1. * count(marque)/(select count(marque) from paris),3) as Pourcentage
 FROM paris	 
@@ -211,7 +211,9 @@ ORDER BY a.marque
 -------------------
 
 -- Quels sont les navigateurs web les plus utilisés ? 
-SELECT navigateur, count(navigateur) as Total, round(1. * count(navigateur)/(select count(navigateur) from paris),3) as Pourcentage
+SELECT  navigateur, 
+	count(navigateur) as Total, 
+	round(1. * count(navigateur)/(select count(navigateur) from paris),3) as Pourcentage
 FROM paris 
 GROUP BY navigateur 
 ORDER BY Pourcentage DESC; 
