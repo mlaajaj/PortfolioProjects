@@ -22,8 +22,7 @@ GROUP BY appareil ;
 	
 	-- Données à corriger : Tablet en Tablette et Computer en Ordinateur pour se retrouver avec 3 variables : Mobile, Tablette et Ordinateur.
 
-SELECT 
-	distinct device_portal_format, 
+SELECT distinct device_portal_format, 
 	CASE device_portal_format
 	when 'Tablet' then 'Tablette'
 	when 'Computer' then 'Ordinateur'
@@ -49,13 +48,11 @@ FROM paris;
 
 -- 2. Colonne device_constructor_name qui indique le nom du constructeur de l'appareil 
 
-
-
-
-SELECT 
-	DISTINCT device_constructor_name as marque, count(*) as Total
+SELECT DISTINCT device_constructor_name as marque, 
+	count(*) as Total
 FROM paris
 GROUP BY marque;
+
 	-- Autre et other = même chose 
 	
 ALTER TABLE paris
@@ -73,8 +70,8 @@ FROM paris;
 
 -- 3. Colonne device_browser_name_version = correspond au navigateur utilisé 
 
-SELECT 
-	DISTINCT device_browser_name_version as browser, count(*) as Total
+SELECT DISTINCT device_browser_name_version as browser, 
+	count(*) as Total
 FROM paris
 GROUP BY browser;
  
@@ -96,8 +93,8 @@ FROM paris;
 
 -- 4. Langue d'utilisation
 	
-SELECT
-	distinct userlanguage as langue, count(*)
+SELECT distinct userlanguage as langue, 
+	count(*) as Total
 FROM paris
 GROUP BY langue;	
 	
@@ -126,18 +123,13 @@ FROM paris;
 	
 -- 5.Les noms de site 
 
-SELECT 
-	substr(nom_site, 1, instr(nom_site," ") -1), 
-	round(1. * count(*)/(select count(*) from paris),2)
-FROM 
-	paris
-group by 
-	substr(nom_site, 1, instr(nom_site," ") -1)
-HAVING 
-	round(1. * count(*)/(select count(*) from paris),2) > 0.03  ;	
+SELECT  substr(nom_site, 1, instr(nom_site," ") -1) as emplacement, 
+	round(1. * count(*)/(select count(*) from paris),2) as Pourcentage
+FROM paris
+group by emplacement
+HAVING Pourcentage > 0.03  ;	
 
 	
-
 ALTER TABLE paris 
 add emplacement as (substr(nom_site, 1, instr(nom_site," ") -1)) ; 
 
@@ -172,21 +164,19 @@ LIMIT 10;
 -------------------
 
 -- Quel type d'appareil est majoritaire ? 
-SELECT 
-	device, 
+SELECT  device, 
 	count(device) as Total, 
 	round( 1. * count(device)/(select count(device) from paris),3) as Pourcentage
-FROM 
-	paris 
-GROUP BY 
-	device
-ORDER BY 
-	Pourcentage ASC; 
+FROM paris 
+GROUP BY device
+ORDER BY Pourcentage ASC; 
 
 -------------------
 	
 -- Pour les mobiles, quelle marque est majoritaire ? 
-select marque, count(marque) as Total, round( 1. * count(marque)/(select count(marque) from paris),3) as Pourcentage
+select  marque, 
+	count(marque) as Total, 
+	round( 1. * count(marque)/(select count(marque) from paris),3) as Pourcentage
 FROM paris	 
 WHERE device = 'Mobile'
 GROUP BY marque; 	
@@ -194,7 +184,9 @@ GROUP BY marque;
 -------------------
 
 -- Quelle marque est majoritaire (tout appareil confondu) ? 
-SELECT marque, count(marque) as Total, round(1. * count(marque)/(select count(marque) from paris),3) as Pourcentage
+SELECT  marque, 
+	count(marque) as Total, 
+	round(1. * count(marque)/(select count(marque) from paris),3) as Pourcentage
 FROM paris	
 GROUP BY marque
 ORDER BY Pourcentage DESC ;
@@ -205,13 +197,16 @@ ORDER BY Pourcentage DESC ;
 with p as (
 SELECT marque, count(*) as Tot
 FROM paris
-group by marque)
-SELECT a.marque, a.device, count(a.device) as Total, round(1.0 * count(a.device)/(p.Tot),3) as Pourcentage
-from paris as a 
-inner join p on 
-a.marque = p.marque
-group by a.marque, a.device
-order by a.marque	
+GROUP BY marque)
+SELECT a.marque, 
+	a.device, 
+	count(a.device) as Total, 
+	round(1.0 * count(a.device)/(p.Tot),3) as Pourcentage
+FROM paris as a 
+INNER JOIN p 
+ON a.marque = p.marque
+GROUP BY a.marque, a.device
+ORDER BY a.marque	
 
 -------------------
 
@@ -224,11 +219,16 @@ ORDER BY Pourcentage DESC;
 -------------------
 
 -- Navigateurs les plus utilisés par type d'appareil 	
-with p as (
-SELECT device, count(device) as Tot
+WITH p as (
+SELECT  device, 
+	count(device) as Tot
 FROM paris 
-group by device)	
-SELECT a.device, a.navigateur, count(a.navigateur) as Total, round(1. * count(a.navigateur) / p.Tot,2) as Pourcentage
+GROUP BY device)
+
+SELECT  a.device, 
+	a.navigateur, 
+	count(a.navigateur) as Total, 
+	round(1. * count(a.navigateur) / p.Tot,2) as Pourcentage
 FROM paris as a 
 INNER JOIN p 
 ON a.device = p.device
@@ -237,8 +237,11 @@ GROUP BY a.device, a.navigateur;
 -------------------
 
 -- Temps moyen et consommations data moyennes ventilés par emplacement
-SELECT emplacement, avg(temps_de_sessions_en_minutes) as TempsMoyen, avg(donnee_entrante_go) as DownloadMoyen, avg(donnee_sortante_gigaoctet) as UploadMoyen,
-round(1. * count(*)/(select count(*) from paris),2) as Pourcentage
+SELECT emplacement, 
+	avg(temps_de_sessions_en_minutes) as TempsMoyen, 
+	avg(donnee_entrante_go) as DownloadMoyen, 
+	avg(donnee_sortante_gigaoctet) as UploadMoyen,
+	round(1. * count(*)/(select count(*) from paris),2) as Pourcentage
 FROM paris
 GROUP BY emplacement
 ORDER BY Pourcentage desc;
@@ -246,16 +249,22 @@ ORDER BY Pourcentage desc;
 -------------------
 
 -- Temps moyen et consommations data moyennes ventilés par type d'appareil 
-SELECT device, avg(temps_de_sessions_en_minutes) as TempsMoyen, avg(donnee_entrante_go) as DownloadMoyen, avg(donnee_sortante_gigaoctet) as UploadMoyen,
-round(1. * count(*)/(SELECT count(*) FROM paris),2) as Pourcentage
+SELECT  device, 
+	avg(temps_de_sessions_en_minutes) as TempsMoyen, 
+	avg(donnee_entrante_go) as DownloadMoyen, 
+	avg(donnee_sortante_gigaoctet) as UploadMoyen,
+	round(1. * count(*)/(SELECT count(*) FROM paris),2) as Pourcentage
 FROM paris
 group by device;
 
 -------------------
 
 -- Temps moyen et consommations data moyennes ventilés par navigateur
-SELECT navigateur, avg(temps_de_sessions_en_minutes) as TempsMoyen, avg(donnee_entrante_go) as DownloadMoyen, avg(donnee_sortante_gigaoctet) as UploadMoyen,
-round(1. * count(*)/(select count(*) from paris),2) as Pourcentage
+SELECT  navigateur, 
+	avg(temps_de_sessions_en_minutes) as TempsMoyen, 
+	avg(donnee_entrante_go) as DownloadMoyen, 
+	avg(donnee_sortante_gigaoctet) as UploadMoyen,
+	round(1. * count(*)/(select count(*) from paris),2) as Pourcentage
 FROM paris
 GROUP BY navigateur
 HAVING pourcentage >0;
@@ -263,8 +272,11 @@ HAVING pourcentage >0;
 -------------------
 
 -- Temps moyen et consommations data moyennes ventilés par langue d'utilisation
-SELECT langue, avg(temps_de_sessions_en_minutes) as TempsMoyen, avg(donnee_entrante_go) as DownloadMoyen, avg(donnee_sortante_gigaoctet) as UploadMoyen,
-round(1. * count(*)/(select count(*) from paris),2) as Pourcentage
+SELECT  langue, 
+	AVG(temps_de_sessions_en_minutes) as TempsMoyen, 
+	AVG(donnee_entrante_go) as DownloadMoyen, 
+	AVG(donnee_sortante_gigaoctet) as UploadMoyen,
+	round(1. * count(*)/(SELECT COUNT(*) from paris),2) as Pourcentage
 FROM paris
 GROUP BY langue
 HAVING pourcentage >0;
@@ -272,8 +284,11 @@ HAVING pourcentage >0;
 -------------------
 
 -- Temps moyen et consommations data moyennes ventilés par jour
-SELECT jour_semaine, avg(temps_de_sessions_en_minutes) as TempsMoyen, avg(donnee_entrante_go) as DownloadMoyen, avg(donnee_sortante_gigaoctet) as UploadMoyen,
-round(1. * count(*)/(select count(*) from paris),2) as Pourcentage
+SELECT  jour_semaine, 
+	avg(temps_de_sessions_en_minutes) as TempsMoyen, 
+	avg(donnee_entrante_go) as DownloadMoyen, 
+	avg(donnee_sortante_gigaoctet) as UploadMoyen,
+	round(1. * count(*)/(select count(*) from paris),2) as Pourcentage
 FROM paris
 GROUP BY jour_semaine
 HAVING pourcentage >0;
