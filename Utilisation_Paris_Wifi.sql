@@ -40,7 +40,7 @@ ADD device as (
 	else device_portal_format
 	end); 
 
--- Nous aurions pu également changer la colonne via alter table puis update. Je préfère partir sur une nouvelle colonne.
+-- Nous aurions pu également mettre à jour les données de la colonne via "ALTER TABLE puis UPDATE"
 
 SELECT distinct device
 FROM paris;
@@ -51,6 +51,7 @@ FROM paris;
 SELECT DISTINCT device_constructor_name
 from paris;
 	-- Autre et other = même chose 
+	
 ALTER TABLE paris
 ADD marque as (
 	CASE device_constructor_name
@@ -62,7 +63,6 @@ ADD marque as (
 SELECT distinct marque
 from paris;
 	
-
 -------------------
 
 -- 3. Colonne device_browser_name_version = correspond au navigateur utilisé 
@@ -71,8 +71,7 @@ select distinct device_browser_name_version
 from paris;
  
 	-- Example d'output : "Chrome 76.0" 
-	-- Nous avons des informations concernant la version des navigateurs, cela peut être intéressant mais nous allons plutôt nous concentrer sur le nom du navigateur en lui même.
-	-- c-a-d le premier mot "Safari", "Chrome"...
+	-- Nous avons besoin uniquement du nom du navigateur à savoir 'Chrome' ou 'Safari'...
 	
 ALTER TABLE paris
 ADD navigateur as (
