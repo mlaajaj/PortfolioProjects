@@ -1,4 +1,7 @@
--- A la découverte de notre jeux de données 
+--- Vue d'ensemble du jeux de données ---
+-- Jeux de données présentant l'ensemble des sessions des utilisateurs des hotspots Wifi de la Ville de Paris par site. 
+-- Disponible sur le site opendata.paris.fr 
+
 
 SELECT *
 FROM paris
@@ -60,7 +63,7 @@ SELECT distinct marque
 from paris;
 	
 
-------------------------------------------------------------------------------------------------------------
+-------------------
 
 -- 3. Colonne device_browser_name_version = correspond au navigateur utilisé 
 
@@ -82,7 +85,7 @@ ADD navigateur as (
 select distinct navigateur 
 from paris;
 
-------------------------------------------------------------------------------------------------------------
+-------------------
 
 -- 4. Langue d'utilisation
 	
@@ -128,7 +131,7 @@ add emplacement as (substr(nom_site, 1, instr(nom_site," ") -1)) ;
 select distinct emplacement_ok
 from paris;
 
-------------------------------------------------------------------------------------------------------------
+-------------------
 
 -- 6. Dates et jours de la semaine 
 
@@ -153,27 +156,31 @@ select *
 from paris_temp
 limit 10;
 
+-------------------
 
 -- Quel type d'appareil est majoritaire ? 
 select device, count(device) as Total, round( 1. * count(device)/(select count(device) from paris),3) as Pourcentage
-from paris_temp 
-group by device; 
-	-- 78% des connexions se font via Mobile
+from paris 
+group by device
+order by Pourcentage asc; 
+
+-------------------
 	
 -- Pour les mobiles, quelle marque est majoritaire ? 
 select marque, count(marque) as Total, round( 1. * count(marque)/(select count(marque) from paris),3) as Pourcentage
-from paris_temp 
+from paris	 
 where device = 'Mobile'
 group by marque; 	
 
+-------------------
 
 -- Quelle marque est majoritaire (tout appareil confondu) ? 
 SELECT marque, count(marque) as Total, round(1. * count(marque)/(select count(marque) from paris),3) as Pourcentage
 FROM paris	
 group by marque
 order by Pourcentage desc ;
-	-- 35% des appareils connectés proviennent de la marque Apple 
-	
+
+-------------------
 
 -- Quels appareils sont les utilisés pour chaque marque ? 
 with p as (
@@ -186,16 +193,18 @@ inner join p on
 a.marque = p.marque
 group by a.marque, a.device
 order by a.marque	
-	-- Les smartphones (Iphone) représentent 73% des appareils de la marque Apple puis nous avons 24% d'ordinateur. Concernant Samsung, on est à 99% de smartphones
 
--- Navigateurs 
+-------------------
+
+-- Quels sont les navigateurs web les plus utilisés ? 
 SELECT navigateur, count(navigateur) as Total, round(1. * count(navigateur)/(select count(navigateur) from paris),3) as Pourcentage
 from paris 
 group by navigateur 
+order by Pourcentage desc; 
 
-	-- Le navigateur le plus utilisé est Chrome avec 53% d'utilisation
-	-- Regardons le navigateur le plus utilisé par type d'appareil 
-	
+-------------------
+
+-- Navigateurs les plus utilisés par type d'appareil 	
 with p as (
 select device, count(device) as Tot
 from paris 
@@ -206,69 +215,47 @@ INNER JOIN p
 ON a.device = p.device
 group by a.device, a.navigateur;
 
-	-- Sur téléphone, on a Chrome qui est devant mais Safari reste très proche par contre sur Ordinateur, Chrome est loin devant avec Firefox. 
+-------------------
 
+-- Temps moyen et consommations data moyennes ventilés par emplacement
+select emplacement, avg(temps_de_sessions_en_minutes) as TempsMoyen, avg(donnee_entrante_go) as DownloadMoyen, avg(donnee_sortante_gigaoctet) as UploadMoyen,
+round(1. * count(*)/(select count(*) from paris),2) as Pourcentage
+from paris
+group by emplacement
+order by Pourcentage desc;
 
-select emplacement, avg(temps_de_sessions_en_minutes), avg(donnee_entrante_go), avg(donnee_sortante_gigaoctet),
-round(1. * count(*)/(select count(*) from paris_temp),2) as Pourcentage
-from paris_temp
-group by emplacement;
+-------------------
 
-select device, avg(temps_de_sessions_en_minutes), avg(donnee_entrante_go), avg(donnee_sortante_gigaoctet),
-round(1. * count(*)/(select count(*) from paris_temp),2) as Pourcentage
-from paris_temp
+-- Temps moyen et consommations data moyennes ventilés par type d'appareil 
+select device, avg(temps_de_sessions_en_minutes) as TempsMoyen, avg(donnee_entrante_go) as DownloadMoyen, avg(donnee_sortante_gigaoctet) as UploadMoyen,
+round(1. * count(*)/(select count(*) from paris),2) as Pourcentage
+from paris
 group by device;
 
-select navigateur, avg(temps_de_sessions_en_minutes), avg(donnee_entrante_go), avg(donnee_sortante_gigaoctet),
-round(1. * count(*)/(select count(*) from paris_temp),2) as Pourcentage
-from paris_temp
+-------------------
+
+-- Temps moyen et consommations data moyennes ventilés par navigateur
+select navigateur, avg(temps_de_sessions_en_minutes) as TempsMoyen, avg(donnee_entrante_go) as DownloadMoyen, avg(donnee_sortante_gigaoctet) as UploadMoyen,
+round(1. * count(*)/(select count(*) from paris),2) as Pourcentage
+from paris
 group by navigateur
 having pourcentage >0;
 
-select langue, avg(temps_de_sessions_en_minutes), avg(donnee_entrante_go), avg(donnee_sortante_gigaoctet),
-round(1. * count(*)/(select count(*) from paris_temp),2) as Pourcentage
-from paris_temp
+-------------------
+
+-- Temps moyen et consommations data moyennes ventilés par langue d'utilisation
+select langue, avg(temps_de_sessions_en_minutes) as TempsMoyen, avg(donnee_entrante_go) as DownloadMoyen, avg(donnee_sortante_gigaoctet) as UploadMoyen,
+round(1. * count(*)/(select count(*) from paris),2) as Pourcentage
+from paris
 group by langue
 having pourcentage >0;
 
-select jour_semaine, avg(temps_de_sessions_en_minutes), avg(donnee_entrante_go), avg(donnee_sortante_gigaoctet),
-round(1. * count(*)/(select count(*) from paris_temp),2) as Pourcentage
-from paris_temp
+-------------------
+
+-- Temps moyen et consommations data moyennes ventilés par jour
+select jour_semaine, avg(temps_de_sessions_en_minutes) as TempsMoyen, avg(donnee_entrante_go) as DownloadMoyen, avg(donnee_sortante_gigaoctet) as UploadMoyen,
+round(1. * count(*)/(select count(*) from paris),2) as Pourcentage
+from paris
 group by jour_semaine
 having pourcentage >0;
 
-select jour_semaine, count(*)/7 as Moyenne
-from paris_temp
-group by jour_semaine;
-
-select jour_semaine,langue,
-round(1. * count(*)/(select count(*) from paris_temp),4) as Pourcentage
-from paris_temp
-group by jour_semaine, langue;
-
-with p as (
-select emplacement, count(*) as Tot
-from paris_temp 
-group by emplacement )
-select a.emplacement, a.marque, round(1.0 * count(a.emplacement)/p.Tot,2) as Pourcentage
-from paris_temp as a 
-inner join p on a.emplacement = p.emplacement
-group by a.emplacement, a.marque;
-
-select emplacement, datetime, strftime('%Y', datetime) as Year, strftime('%m', datetime) as Month, strftime('%d', datetime) as Day, jour_semaine, strftime('%H', datetime)+2 as Heure
-from paris_temp
-where Heure = 25; 
-
-select nom_site, count(*) as Tot
-from paris_temp
-where strftime('%H', datetime)+2 = 25
-group by nom_site; 
-
-select jour_semaine ,
-case when strftime('%H', datetime)+2 = 25 then 1
-else strftime('%H', datetime)+2 
-end as Heure
-, count(*) as Tot
-from paris_temp
-group by jour_semaine, Heure
-order by 1,3 desc;
